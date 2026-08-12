@@ -1,22 +1,68 @@
 plugins {
-	kotlin("jvm") version "2.4.0"
+    kotlin("jvm") version "2.3.20"
+    `java-library`
+    `maven-publish`
+
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    id("dev.detekt") version "2.0.0-alpha.6"
+    id("org.jetbrains.dokka") version "2.2.0"
+    id("org.jetbrains.kotlinx.kover") version "0.9.9"
 }
 
-group = "io.vloikov"
-version = "1.0-SNAPSHOT"
-
+group = property("group")!!
+version = property("version")!!
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	testImplementation(kotlin("test"))
+    testImplementation(kotlin("test"))
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
 }
 
 kotlin {
-	jvmToolchain(25)
+    jvmToolchain(21)
 }
 
 tasks.test {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.named("check") {
+    dependsOn("ktlintCheck")
+    dependsOn("detekt")
+}
+
+tasks.register("verifyCodeQuality") {
+    group = "verification"
+    dependsOn("ktlintCheck", "detekt", "test")
+}
+
+tasks.register("formatCode") {
+    group = "formatting"
+    dependsOn("ktlintFormat")
+}
+
+tasks.register("ci") {
+    group = "verification"
+    description = "Runs all checks performed in GitHub Actions."
+
+    dependsOn(
+        "ktlintCheck",
+        "detekt",
+        "test",
+        "koverHtmlReport",
+        "dokkaGenerateHtml",
+        "assemble",
+    )
 }

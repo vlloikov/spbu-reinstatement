@@ -1,0 +1,33 @@
+config:
+  validation: true
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+
+complexity:
+  LongMethod:
+    allowedLines: 40
+  LongParameterList:
+    allowedFunctionParameters: 5
+  NestedBlockDepth:
+    allowedDepth: 4
+  TooManyFunctions:
+      allowedFunctionsPerFile: 20
+      ignorePrivate: true
+      excludes:
+          - '**/test/**'
+
+style:
+  ReturnCount:
+    max: 3
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: false
+
+naming:
+  FunctionNaming:
+    functionPattern: '[a-z][a-zA-Z0-9]*'
